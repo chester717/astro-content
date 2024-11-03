@@ -1,4 +1,22 @@
+// call the api and get the response
+// structure the response into a card layout and push to the container div
+
 const apiURL = "https://contenthub-api.eco.astro.com.my/channel/all.json";
+
+const formatTime = (dateTime) => {
+  const date = new Date(dateTime)
+
+  let hours = date.getHours()
+  let minutes = date.getMinutes()
+
+  const day = hours >= 12 ? "PM" : 'AM';
+
+  hours = hours % 12 || 12;
+
+  const formatMinutes = minutes.toString().padStart(2, "0");
+
+  return `${hours}:${formatMinutes} ${day}`;
+};
 
 const getAstroContentGuide = async () => {
   try {
@@ -6,13 +24,15 @@ const getAstroContentGuide = async () => {
     const data = await response.json();
     const channels = data.response;
 
-    console.log(channels); // Array of channels
 
     const channelGrid = document.getElementById("channelGrid");
 
     channels.forEach((channel) => {
       const card = document.createElement("div"); // contain all the channel data
       card.className = "channel-card"
+
+      const currentSchedule = channel?.currentSchedule || [];
+
 
       const logo = document.createElement("img"); // creating the image
       logo.className = "channel-logo";
@@ -24,8 +44,13 @@ const getAstroContentGuide = async () => {
       info.innerHTML = `
       <div class="channel-number" > CH${channel.stbNumber}</div>
       <div class="channel-title" > ${channel.title}</div>
-      
+      <div class="playing-now" > On Now ${currentSchedule[0].title}</div>;
+      <div class="next" > ${formatTime(currentSchedule[1].dateTime)} ${currentSchedule[1].title}</div>;
+      <div class="later" > ${formatTime(currentSchedule[2].dateTime)} ${currentSchedule[2].title}</div>;
       `;
+
+      const programList = document.createElement("div");
+      programList.className = "program-list";
 
       card.appendChild(logo);
       card.appendChild(info);
